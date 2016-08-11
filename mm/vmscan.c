@@ -1761,7 +1761,7 @@ out:
 		unsigned long scan;
 
 		scan = zone_nr_lru_pages(mz, lru);
-		if (priority || noswap || !vmscan_swappiness(mz, sc)) {
+		if (sc->priority || noswap || !vmscan_swappiness(sc)) {
 			scan >>= sc->priority;
 			if (!scan && force_scan)
 				scan = SWAP_CLUSTER_MAX;
@@ -2895,7 +2895,10 @@ static int kswapd(void *p)
 		}
 	}
 
+	tsk->flags &= ~(PF_MEMALLOC | PF_SWAPWRITE | PF_KSWAPD);
 	current->reclaim_state = NULL;
+	lockdep_clear_current_reclaim_state();
+
 	return 0;
 }
 
